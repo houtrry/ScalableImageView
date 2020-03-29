@@ -1,0 +1,21 @@
+ext {
+    android = [
+            compileSdkVersion: 29,
+            buildToolsVersion: "29.0.2",
+            minSdkVersion    : 19,
+            targetSdkVersion : 26,
+            versionCode      : 1,
+            versionName      : "1.0"
+    ]
+
+    dependencies = [
+
+    ]
+
+    thirddependencies = [
+            "kotlin"          : "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version",
+            "appcompat"       : "androidx.appcompat:appcompat:1.0.2",
+            "core-ktx"        : "androidx.core:core-ktx:1.0.2",
+            "constraintlayout": "androidx.constraintlayout:constraintlayout:1.1.3",
+    ]
+}
