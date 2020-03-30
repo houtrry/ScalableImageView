@@ -41,12 +41,17 @@ class ScalableImageView : View, GestureDetector.OnGestureListener,
 
     private var mCurrentScale: Float = 0f
     private var isBigType: Boolean = false
+    private var scaleFraction: Float = 0f
+        set(value) {
+            field = value
+            ViewCompat.postInvalidateOnAnimation(this)
+        }
 
     private val mGestureDetector: GestureDetectorCompat by lazy {
         GestureDetectorCompat(context, this)
     }
 
-    private val mScroller:OverScroller by lazy {
+    private val mScroller: OverScroller by lazy {
         OverScroller(context)
     }
 
@@ -119,7 +124,12 @@ class ScalableImageView : View, GestureDetector.OnGestureListener,
         return true
     }
 
-    override fun onFling(downEvent: MotionEvent?, currentEvent: MotionEvent?, velocityX: Float, velocityY: Float): Boolean {
+    override fun onFling(
+        downEvent: MotionEvent?,
+        currentEvent: MotionEvent?,
+        velocityX: Float,
+        velocityY: Float
+    ): Boolean {
         log("===>>>onFling")
         if (isBigType) {
             mScroller.fling(
