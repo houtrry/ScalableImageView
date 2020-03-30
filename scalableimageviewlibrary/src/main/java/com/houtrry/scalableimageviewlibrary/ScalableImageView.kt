@@ -1,15 +1,14 @@
 package com.houtrry.scalableimageviewlibrary
 
+import android.animation.ObjectAnimator
 import android.content.Context
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
-import android.graphics.Canvas
-import android.graphics.Paint
+import android.graphics.*
 import android.util.AttributeSet
 import android.util.Log
 import android.view.GestureDetector
 import android.view.MotionEvent
 import android.view.View
+import android.view.animation.LinearInterpolator
 import android.widget.OverScroller
 import androidx.core.view.GestureDetectorCompat
 import androidx.core.view.ViewCompat
@@ -46,6 +45,9 @@ class ScalableImageView : View, GestureDetector.OnGestureListener,
             field = value
             ViewCompat.postInvalidateOnAnimation(this)
         }
+
+    private var mScaleCenterX = 0f
+    private var mScaleCenterY = 0f
 
     private val mGestureDetector: GestureDetectorCompat by lazy {
         GestureDetectorCompat(context, this)
@@ -92,6 +94,8 @@ class ScalableImageView : View, GestureDetector.OnGestureListener,
         mOriginalOffsetX = (w - mBitmap.width) * 0.5f
         mOriginalOffsetY = (h - mBitmap.height) * 0.5f
 
+        mScaleCenterX = w * 0.5f
+        mScaleCenterY = h * 0.5f
         log("mMinScale: $mMinScale, mMaxScale: $mMaxScale")
         log("mWidth: $mWidth, mHeight: $mHeight, mBitmap:(${mBitmap.width}, ${mBitmap.height}), mOffsetX: $mOriginalOffsetX, mOffsetY： $mOriginalOffsetY")
     }
@@ -99,9 +103,10 @@ class ScalableImageView : View, GestureDetector.OnGestureListener,
     override fun onDraw(canvas: Canvas?) {
         super.onDraw(canvas)
         canvas?.let {
-            it.translate(mOffsetX, mOffsetY)
-            mCurrentScale = if (isBigType) mMaxScale else mMinScale
-            it.scale(mCurrentScale, mCurrentScale, mWidth * 0.5f, mHeight * 0.5f)
+            it.drawColor(Color.RED)
+            it.translate(mOffsetX * scaleFraction, mOffsetY * scaleFraction)
+            mCurrentScale = mMinScale + scaleFraction * (mMaxScale - mMinScale)
+            it.scale(mCurrentScale, mCurrentScale, mScaleCenterX, mScaleCenterY)
             it.drawBitmap(mBitmap, mOriginalOffsetX, mOriginalOffsetY, mPaint)
         }
     }
@@ -181,7 +186,15 @@ class ScalableImageView : View, GestureDetector.OnGestureListener,
     override fun onDoubleTap(p0: MotionEvent?): Boolean {
         log("===>>>onDoubleTap")
         isBigType = !isBigType
-        ViewCompat.postInvalidateOnAnimation(this)
+        if (isBigType) {
+            mScaleCenterX = p0!!.x
+            mScaleCenterX = p0.y
+
+            mOffsetX = 0f
+            mOffsetY = 0f
+
+        }
+        displayAnimator()
         return false
     }
 
@@ -203,6 +216,21 @@ class ScalableImageView : View, GestureDetector.OnGestureListener,
             mOffsetY = mScroller.currY.toFloat()
             log("===>>>computeScroll， mOffsetX: $mOffsetX, mOffsetY: $mOffsetY")
             ViewCompat.postInvalidateOnAnimation(this)
+        }
+    }
+
+    private val scaleAnimator: ObjectAnimator by lazy {
+        val animator = ObjectAnimator.ofFloat(this, "scaleFraction", 0f, 1f)
+        animator.interpolator = LinearInterpolator()
+        animator.duration = 2000
+        animator
+    }
+
+    private fun displayAnimator() {
+        if (isBigType) {
+            scaleAnimator.start()
+        } else {
+            scaleAnimator.reverse()
         }
     }
 
