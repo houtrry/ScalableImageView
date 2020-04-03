@@ -115,20 +115,32 @@ class ScalableImageView : View, GestureDetector.OnGestureListener,
         return mGestureDetector.onTouchEvent(event)
     }
 
+    /**
+     * 手指按下后，100毫秒内未抬起、未移动；
+     */
     override fun onShowPress(p0: MotionEvent?) {
         log("===>>>onShowPress")
     }
 
+    /**
+     * 手指按下后未移动，并在500毫秒内抬起（可以认定为单击）
+     */
     override fun onSingleTapUp(p0: MotionEvent?): Boolean {
         log("===>>>onSingleTapUp")
         return false
     }
 
+    /**
+     * 手指按下
+     */
     override fun onDown(p0: MotionEvent?): Boolean {
         log("===>>>onDown")
         return true
     }
 
+    /**
+     * 手指快速拖动后松手（惯性滚动）
+     */
     override fun onFling(
         downEvent: MotionEvent?,
         currentEvent: MotionEvent?,
@@ -151,6 +163,9 @@ class ScalableImageView : View, GestureDetector.OnGestureListener,
         return false
     }
 
+    /**
+     * 手指拖动
+     */
     override fun onScroll(
         downEvent: MotionEvent?,
         currentEvent: MotionEvent?,
@@ -179,10 +194,17 @@ class ScalableImageView : View, GestureDetector.OnGestureListener,
         return false
     }
 
+    /**
+     * 长按（手指按下后，500毫秒内未抬起、未移动）
+     */
     override fun onLongPress(p0: MotionEvent?) {
         log("===>>>onLongPress")
     }
 
+    /**
+     * 触发双击事件
+     * （手指抬起后300毫秒内再次按下（注意：是再次按下时就触发，并不是等它抬起后才触发））
+     */
     override fun onDoubleTap(p0: MotionEvent?): Boolean {
         log("===>>>onDoubleTap")
         isBigType = !isBigType
@@ -198,11 +220,24 @@ class ScalableImageView : View, GestureDetector.OnGestureListener,
         return false
     }
 
+    /**
+     * 触发双击后的手指触摸事件，包括ACTION_DOWN、ACTION_MOVE、ACTION_UP
+     * （注意：在触发长按后，不会继续收到ACTION_MOVE事件，因为在手指长按过程中，
+     * 是不需要处理手指移动的动作的，也就是会直接忽略ACTION_MOVE的事件。
+     * 还有，此方法回调后，在触发长按事件之前，如有新手指按下，则不再认定是双击了，
+     * 所以不会继续回调此方法，取而代之的是onScroll）。
+     * 此方法与上面的onDoubleTap方法的区别就是，
+     * onDoubleTap在一次双击事件中只会回调一次，而这个方法能回调多次；
+     */
     override fun onDoubleTapEvent(p0: MotionEvent?): Boolean {
         log("===>>>onDoubleTapEvent, $isBigType")
         return false
     }
 
+    /**
+     * 已经确认这是一次单击事件，想触发双击必须继续快速点击两次屏幕
+     * （即：手指抬起之后，300毫秒内没等到手指再次按下）；
+     */
     override fun onSingleTapConfirmed(p0: MotionEvent?): Boolean {
         log("===>>>onSingleTapConfirmed")
         return false
